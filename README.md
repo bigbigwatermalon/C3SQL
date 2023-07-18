@@ -1,5 +1,5 @@
 # C3SQL
-The code for the paper C3: Zero-shot Text-to-SQL with ChatGPT
+The code for the paper C3: Zero-shot Text-to-SQL with ChatGPT ([https://arxiv.org/abs/2307.07306](https://arxiv.org/abs/2307.07306))
 
 ## Prepare Spider Data
 
