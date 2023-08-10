@@ -19,7 +19,10 @@ chat_prompt = [
     },
     {
         "role": "user",
-        "content": "Tips 1: \nQuestion: Which origin has most number of flights?\nGold SQL: select origin from flight group by origin order by count ( * ) desc limit 1;\nNotice that the Gold SQL doesn't select COUNT(*) because the question only wants to know the origin and the number should be only used in ORDER BY clause, there are many questions asks in this way, and I need you to remember this in the the following questions."
+        "content": """Tips 1: 
+Question: Which A has most number of B?
+Gold SQL: select A from B group by A order by count ( * ) desc limit 1;
+Notice that the Gold SQL doesn't select COUNT(*) because the question only wants to know the A and the number should be only used in ORDER BY clause, there are many questions asks in this way, and I need you to remember this in the the following questions."""
     },
     {
         "role": "assistant",
@@ -27,7 +30,11 @@ chat_prompt = [
     },
     {
         "role": "user",
-        "content": "Tips 2: \nDon't use \"IN\", \"OR\", \"LEFT JOIN\" as it might cause extra results, use \"INTERSECT\" or \"EXCEPT\" instead, and remember to use \"DISTINCT\" or \"LIMIT\" when necessary.\nFor example, \nQuestion: Who are the nominees who have been nominated for both a Tony Award and a Drama Desk Award?\nGold SQL should be: select nominee from musical where award = 'Tony Award' intersect select nominee from musical where award = 'Drama Desk Award';"
+        "content": """Tips 2: 
+Don't use "IN", "OR", "LEFT JOIN" as it might cause extra results, use "INTERSECT" or "EXCEPT" instead, and remember to use "DISTINCT" or "LIMIT" when necessary.
+For example, 
+Question: Who are the A who have been nominated for both B award and C award?
+Gold SQL should be: select A from X where award = 'B' intersect select A from X where award = 'C';"""
     },
     {
         "role": "assistant",

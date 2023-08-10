@@ -66,37 +66,26 @@ def get_db_schemas(all_db_infos, opt=None):
         column_names_original = db["column_names_original"]
         column_names = db["column_names"]
         column_types = db["column_types"]
-        if opt.dataset_name == "bird":
-            column_types.insert(0, "text")
 
         db_schemas[db["db_id"]] = {}
 
         primary_keys, foreign_keys = [], []
         # record primary keys
-        for i in range(1):
-            if opt.dataset_name == "bird":
-                break
-            for pk_column_idx in db["primary_keys"]:
-                if opt.dataset_name == "bird":
-                    while isinstance(pk_column_idx, list):
-                        pk_column_idx = pk_column_idx[0]
-                pk_table_name_original = table_names_original[column_names_original[pk_column_idx][0]]
-                pk_column_name_original = column_names_original[pk_column_idx][1]
+        for pk_column_idx in db["primary_keys"]:
+            pk_table_name_original = table_names_original[column_names_original[pk_column_idx][0]]
+            pk_column_name_original = column_names_original[pk_column_idx][1]
 
-                primary_keys.append(
-                    {
-                        "table_name_original": pk_table_name_original.lower(),
-                        "column_name_original": pk_column_name_original.lower()
-                    }
-                )
+            primary_keys.append(
+                {
+                    "table_name_original": pk_table_name_original.lower(),
+                    "column_name_original": pk_column_name_original.lower()
+                }
+            )
 
         db_schemas[db["db_id"]]["pk"] = primary_keys
 
         # record foreign keys
         for source_column_idx, target_column_idx in db["foreign_keys"]:
-            if opt.dataset_name == "bird" and source_column_idx > len(column_names_original) or target_column_idx > len(
-                    column_names_original):
-                continue
             fk_source_table_name_original = table_names_original[column_names_original[source_column_idx][0]]
             fk_source_column_name_original = column_names_original[source_column_idx][1]
 
@@ -304,33 +293,32 @@ def main(opt):
     preprocessed_dataset = []
 
     for natsql_data, data in tqdm(zip(natsql_dataset, dataset)):
-        if opt.dataset_name != "bird":
-            if data[
-                'query'] == 'SELECT T1.company_name FROM Third_Party_Companies AS T1 JOIN Maintenance_Contracts AS T2 ON T1.company_id  =  T2.maintenance_contract_company_id JOIN Ref_Company_Types AS T3 ON T1.company_type_code  =  T3.company_type_code ORDER BY T2.contract_end_date DESC LIMIT 1':
-                data[
-                    'query'] = 'SELECT T1.company_type FROM Third_Party_Companies AS T1 JOIN Maintenance_Contracts AS T2 ON T1.company_id  =  T2.maintenance_contract_company_id ORDER BY T2.contract_end_date DESC LIMIT 1'
-                data['query_toks'] = ['SELECT', 'T1.company_type', 'FROM', 'Third_Party_Companies', 'AS', 'T1', 'JOIN',
-                                      'Maintenance_Contracts', 'AS', 'T2', 'ON', 'T1.company_id', '=',
-                                      'T2.maintenance_contract_company_id', 'ORDER', 'BY', 'T2.contract_end_date',
-                                      'DESC',
-                                      'LIMIT', '1']
-                data['query_toks_no_value'] = ['select', 't1', '.', 'company_type', 'from', 'third_party_companies',
-                                               'as',
-                                               't1', 'join', 'maintenance_contracts', 'as', 't2', 'on', 't1', '.',
-                                               'company_id', '=', 't2', '.', 'maintenance_contract_company_id', 'order',
-                                               'by', 't2', '.', 'contract_end_date', 'desc', 'limit', 'value']
-                data['question'] = 'What is the type of the company who concluded its contracts most recently?'
-                data['question_toks'] = ['What', 'is', 'the', 'type', 'of', 'the', 'company', 'who', 'concluded', 'its',
-                                         'contracts', 'most', 'recently', '?']
-            if data['query'].startswith(
-                    'SELECT T1.fname FROM student AS T1 JOIN lives_in AS T2 ON T1.stuid  =  T2.stuid WHERE T2.dormid IN'):
-                data['query'] = data['query'].replace('IN (SELECT T2.dormid)', 'IN (SELECT T3.dormid)')
-                index = data['query_toks'].index('(') + 2
-                assert data['query_toks'][index] == 'T2.dormid'
-                data['query_toks'][index] = 'T3.dormid'
-                index = data['query_toks_no_value'].index('(') + 2
-                assert data['query_toks_no_value'][index] == 't2'
-                data['query_toks_no_value'][index] = 't3'
+        if data[
+            'query'] == 'SELECT T1.company_name FROM Third_Party_Companies AS T1 JOIN Maintenance_Contracts AS T2 ON T1.company_id  =  T2.maintenance_contract_company_id JOIN Ref_Company_Types AS T3 ON T1.company_type_code  =  T3.company_type_code ORDER BY T2.contract_end_date DESC LIMIT 1':
+            data[
+                'query'] = 'SELECT T1.company_type FROM Third_Party_Companies AS T1 JOIN Maintenance_Contracts AS T2 ON T1.company_id  =  T2.maintenance_contract_company_id ORDER BY T2.contract_end_date DESC LIMIT 1'
+            data['query_toks'] = ['SELECT', 'T1.company_type', 'FROM', 'Third_Party_Companies', 'AS', 'T1', 'JOIN',
+                                  'Maintenance_Contracts', 'AS', 'T2', 'ON', 'T1.company_id', '=',
+                                  'T2.maintenance_contract_company_id', 'ORDER', 'BY', 'T2.contract_end_date',
+                                  'DESC',
+                                  'LIMIT', '1']
+            data['query_toks_no_value'] = ['select', 't1', '.', 'company_type', 'from', 'third_party_companies',
+                                           'as',
+                                           't1', 'join', 'maintenance_contracts', 'as', 't2', 'on', 't1', '.',
+                                           'company_id', '=', 't2', '.', 'maintenance_contract_company_id', 'order',
+                                           'by', 't2', '.', 'contract_end_date', 'desc', 'limit', 'value']
+            data['question'] = 'What is the type of the company who concluded its contracts most recently?'
+            data['question_toks'] = ['What', 'is', 'the', 'type', 'of', 'the', 'company', 'who', 'concluded', 'its',
+                                     'contracts', 'most', 'recently', '?']
+        if data['query'].startswith(
+                'SELECT T1.fname FROM student AS T1 JOIN lives_in AS T2 ON T1.stuid  =  T2.stuid WHERE T2.dormid IN'):
+            data['query'] = data['query'].replace('IN (SELECT T2.dormid)', 'IN (SELECT T3.dormid)')
+            index = data['query_toks'].index('(') + 2
+            assert data['query_toks'][index] == 'T2.dormid'
+            data['query_toks'][index] = 'T3.dormid'
+            index = data['query_toks_no_value'].index('(') + 2
+            assert data['query_toks_no_value'][index] == 't2'
+            data['query_toks_no_value'][index] = 't3'
 
         question = data["question"].replace("\u2018", "'").replace("\u2019", "'").replace("\u201c", "'").replace(
             "\u201d", "'").strip()
@@ -343,10 +331,8 @@ def main(opt):
             natsql, norm_natsql, natsql_skeleton = "", "", ""
             natsql_used_columns, natsql_tokens = [], []
         else:
-            if opt.dataset_name == "bird":
-                sql = data["SQL"].strip()
-            else:
-                sql = data["query"].strip()
+
+            sql = data["query"].strip()
             norm_sql = normalization(sql).strip()
             sql_skeleton = extract_skeleton(norm_sql, db_schemas[db_id]).strip()
             sql_tokens = norm_sql.split()
