@@ -211,25 +211,16 @@ def get_exec_output(
 def get_sqls(results, select_number, db_dir):
     db_ids = []
     all_p_sqls = []
-    # print(len(results))
     for item in results:
         p_sqls = []
         db_ids.append(item['db_id'])
         for i, x in enumerate(item['p_sqls']):
             p_sqls.append(x)
             if i+1 == select_number:
-                # print(f'i: {i}')
                 break
         all_p_sqls.append(p_sqls)
     chosen_p_sqls = []
-    # print(f"all_p_sqls size: {len(all_p_sqls)}")
-    # print(f"db_ids size: {len(db_ids)}")
-    # exit(0)
-    # for i, db_id in tqdm.tqdm(enumerate(db_ids)):
     for i, db_id in enumerate(tqdm.tqdm(db_ids)):
-        # if i < 741 or i > 741:
-        #     continue
-        # print(i)
         p_sqls = all_p_sqls[i]
         db_path = f"{db_dir}/{db_id}/{db_id}"
         cluster_sql_list = []
@@ -242,7 +233,6 @@ def get_sqls(results, select_number, db_dir):
             if flag == "exception":
                 continue
             map_sql2denotation[sql] = denotation
-            # print(denotation_match)
             denotation_match = False
 
             for id, cluster in enumerate(cluster_sql_list):
@@ -254,7 +244,6 @@ def get_sqls(results, select_number, db_dir):
             if not denotation_match:
                 cluster_sql_list.append([sql])
         cluster_sql_list.sort(key=lambda x: len(x), reverse=True)
-        # print(cluster_sql_list)
         if not cluster_sql_list:
             chosen_p_sqls.append(p_sqls[0])
         else:

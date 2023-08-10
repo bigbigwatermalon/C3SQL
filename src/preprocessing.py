@@ -2,7 +2,7 @@ import re
 import json
 import argparse
 
-from utils.bridge_content_encoder import get_database_matches
+from bridge_content_encoder import get_database_matches
 from sql_metadata import Parser
 from tqdm import tqdm
 
@@ -45,16 +45,13 @@ def get_db_contents(question, table_name_original, column_names_original, db_id,
     matched_contents = []
     # extract matched contents for each column
     for column_name_original in column_names_original:
-        if opt.dataset_name == "bird":
-            matches = []
-        else:
-            matches = get_database_matches(
-                question,
-                table_name_original,
-                column_name_original,
-                db_path + "/{}/{}.sqlite".format(db_id, db_id)
-            )
-            matches = sorted(matches)
+        matches = get_database_matches(
+            question,
+            table_name_original,
+            column_name_original,
+            db_path + "/{}/{}.sqlite".format(db_id, db_id)
+        )
+        matches = sorted(matches)
         matched_contents.append(matches)
 
     return matched_contents
@@ -76,23 +73,13 @@ def get_db_schemas(all_db_infos, opt=None):
 
         primary_keys, foreign_keys = [], []
         # record primary keys
-        # print(f'pk_column_idxs: {db["primary_keys"]}')
-        # print(f"column_names_original: {column_names_original}")
         for i in range(1):
             if opt.dataset_name == "bird":
                 break
             for pk_column_idx in db["primary_keys"]:
-                # print(f"pk_column_idx: {pk_column_idx}")
-                # print(f"column_names_original[pk_column_idx][0]: {column_names_original[pk_column_idx][0]}")
-                # print(column_names_original[pk_column_idx])
-                # print(table_names_original)
                 if opt.dataset_name == "bird":
                     while isinstance(pk_column_idx, list):
                         pk_column_idx = pk_column_idx[0]
-                # print(f"column_names_original.length: {len(column_names_original)}")
-                # print(f"pk_column_idx: {pk_column_idx}")
-                # print(f"column_types.length: {len(column_types)}")
-                # print(f"column_names_original[pk_column_idx][0]: {column_names_original[pk_column_idx][0]}")
                 pk_table_name_original = table_names_original[column_names_original[pk_column_idx][0]]
                 pk_column_name_original = column_names_original[pk_column_idx][1]
 
@@ -105,17 +92,10 @@ def get_db_schemas(all_db_infos, opt=None):
 
         db_schemas[db["db_id"]]["pk"] = primary_keys
 
-        # print(f'db_id: {db["db_id"]}')
-        # print(f"table_names_original.length: {len(table_names_original)}")
-        # print(f"column_names_original.length: {len(column_names_original)}")
         # record foreign keys
         for source_column_idx, target_column_idx in db["foreign_keys"]:
-            # print(f"source_column_idx: {source_column_idx}")
-            if opt.dataset_name == "bird" and source_column_idx > len(column_names_original) or target_column_idx > len(column_names_original):
-                # print(f'db_id: {db["db_id"]}')
-                # print(f"column_names_original.length: {len(column_names_original)}")
-                # print(f"source_column_idx: {source_column_idx}")
-                # print(f"target_column_idx: {target_column_idx}")
+            if opt.dataset_name == "bird" and source_column_idx > len(column_names_original) or target_column_idx > len(
+                    column_names_original):
                 continue
             fk_source_table_name_original = table_names_original[column_names_original[source_column_idx][0]]
             fk_source_column_name_original = column_names_original[source_column_idx][1]
@@ -134,15 +114,10 @@ def get_db_schemas(all_db_infos, opt=None):
         db_schemas[db["db_id"]]["fk"] = foreign_keys
 
         db_schemas[db["db_id"]]["schema_items"] = []
-        # print(f"table_names_original: {table_names_original}")
         for idx, table_name_original in enumerate(table_names_original):
             column_names_original_list = []
             column_names_list = []
             column_types_list = []
-            # print(f"table_name_original: {table_name_original}")
-            # print(f"column_names_original: {column_names_original}")
-            # print(f"column_names_original.length: {len(column_names_original)}")
-            # print(f"column_types.length: {len(column_types)}")
             for column_idx, (table_idx, column_name_original) in enumerate(column_names_original):
                 if idx == table_idx:
                     column_names_original_list.append(column_name_original.lower())
@@ -336,9 +311,11 @@ def main(opt):
                     'query'] = 'SELECT T1.company_type FROM Third_Party_Companies AS T1 JOIN Maintenance_Contracts AS T2 ON T1.company_id  =  T2.maintenance_contract_company_id ORDER BY T2.contract_end_date DESC LIMIT 1'
                 data['query_toks'] = ['SELECT', 'T1.company_type', 'FROM', 'Third_Party_Companies', 'AS', 'T1', 'JOIN',
                                       'Maintenance_Contracts', 'AS', 'T2', 'ON', 'T1.company_id', '=',
-                                      'T2.maintenance_contract_company_id', 'ORDER', 'BY', 'T2.contract_end_date', 'DESC',
+                                      'T2.maintenance_contract_company_id', 'ORDER', 'BY', 'T2.contract_end_date',
+                                      'DESC',
                                       'LIMIT', '1']
-                data['query_toks_no_value'] = ['select', 't1', '.', 'company_type', 'from', 'third_party_companies', 'as',
+                data['query_toks_no_value'] = ['select', 't1', '.', 'company_type', 'from', 'third_party_companies',
+                                               'as',
                                                't1', 'join', 'maintenance_contracts', 'as', 't2', 'on', 't1', '.',
                                                'company_id', '=', 't2', '.', 'maintenance_contract_company_id', 'order',
                                                'by', 't2', '.', 'contract_end_date', 'desc', 'limit', 'value']
@@ -470,35 +447,3 @@ def main(opt):
 if __name__ == "__main__":
     opt = parse_option()
     main(opt)
-
-    # # test
-    # db_id = "world_1"
-    # db_path = "./database"
-    # question = "What is the official language used in the country the name of whose head of state is Beatrix."
-    # table_name_1 = "countrylanguage"
-    # column_name_1 = "isofficial"
-    # table_name_2 = "country"
-    # column_name_2 = "headofstate"
-    # matches = get_database_matches(
-    #     question,
-    #     table_name=table_name_2,
-    #     column_name=column_name_2,
-    #     db_path=f"{db_path}/{db_id}/{db_id}.sqlite"
-    # )
-    # print(matches)
-    # matches = get_database_matches(
-    #     question,
-    #     table_name=table_name_1,
-    #     column_name=column_name_1,
-    #     db_path=f"{db_path}/{db_id}/{db_id}.sqlite"
-    # )
-    # print(matches)
-    # table_name_3 = "country"
-    # column_name_3 = "continent"
-    # matches = get_database_matches(
-    #     "What are the African countries that have a  population less than any country in Asia?",
-    #     table_name=table_name_3,
-    #     column_name=column_name_3,
-    #     db_path=f"{db_path}/{db_id}/{db_id}.sqlite"
-    # )
-    # print(matches)

@@ -2,10 +2,10 @@ set -e
 
 tables="./data/spider/tables.json"
 dataset_path="./data/spider/dev.json"
-db_dir="data/spider/database"
+db_dir="database"
 output_dataset_path="predicted_sql.txt"
 
-processed_dataset_path="./generate_datasets/CICO_test.json"
+processed_dataset_path="./generate_datasets/C3_dev.json"
 
 # preprocess data
 bash scripts/prepare_dataset.sh $tables $dataset_path $db_dir $processed_dataset_path

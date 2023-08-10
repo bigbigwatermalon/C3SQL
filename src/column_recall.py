@@ -6,14 +6,15 @@ from tqdm import tqdm
 from collections import Counter
 
 # add your openai api key
-openai.api_key = ""
+openai.api_key = "sk-"
+
 
 def parse_option():
     parser = argparse.ArgumentParser("command line arguments for recall columns")
     parser.add_argument("--input_dataset_path", type=str)
     parser.add_argument("--self_consistent", type=bool, default=True)
     parser.add_argument("--n", type=int, default=10,
-                       help="Size of self-consistent set")
+                        help="Size of self-consistent set")
     parser.add_argument("--add_fk", type=bool, default=True)
     parser.add_argument("--output_dataset_path", type=str)
 
@@ -182,9 +183,6 @@ if __name__ == "__main__":
     else:
         sc_num = 1
     for i, data in enumerate(tqdm(data_all)):
-        # if i != 137:
-        #     continue
-        # print(i)
         schema = generate_schema(data)
         prompt = instruction + 'Schema:\n' + schema
         prompt = prompt + 'Foreign keys: \n'
@@ -200,11 +198,9 @@ if __name__ == "__main__":
                 print(f'api error, wait for 3 seconds and retry...')
                 time.sleep(3)
                 pass
-        # print(tabs_cols_all)
         tab_col_ori = {}
         for table in data['db_schema']:
             tab_col_ori[table['table_name_original'].lower()] = table['column_names_original']
-        # print(tab_col_ori)
         tabs_cols = column_sc(tabs_cols_all, tab_col_ori, data['fk'])
         info = info_generate(tabs_cols, data)
         res.append(info)

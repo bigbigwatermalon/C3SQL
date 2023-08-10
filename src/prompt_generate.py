@@ -33,11 +33,9 @@ if __name__ == "__main__":
                 schema += ', '
             schema = schema[:-2] + ' )\n'
         data['input_sequence'] += schema[:-1]
-        # print(data['input_sequence'])
         for fk in data['fk']:
             data['input_sequence'] += '\n# ' + fk
         data['input_sequence'] += '\n#\n### ' + data['question'] + '\nSELECT'
-        print(data['input_sequence'])
     with open(opt.output_dataset_path, 'w') as f:
         json.dump(data_all, f, indent=2)
 

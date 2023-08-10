@@ -6,19 +6,21 @@ from tqdm import tqdm
 from collections import Counter
 
 # add your openai api key
-openai.api_key = ""
+openai.api_key = "sk-"
+
 
 def parse_option():
     parser = argparse.ArgumentParser("command line arguments for recall tables")
     parser.add_argument("--input_dataset_path", type=str, default='../generate_datasets/preprocessed_test.json')
     parser.add_argument("--self_consistent", type=bool, default=True)
     parser.add_argument("--n", type=int, default=10,
-                       help="Size of self-consistent set")
+                        help="Size of self-consistent set")
     parser.add_argument("--output_dataset_path", type=str)
 
     opt = parser.parse_args()
 
     return opt
+
 
 def generate_reply(input, sc_num):
     completions = openai.ChatCompletion.create(
@@ -76,8 +78,6 @@ def table_sc(tables_all, tables_ori):
             tables_sc.append(tables_exist)
     counts = Counter(tuple(sorted(lst)) for lst in tables_sc)
     most_list, count = counts.most_common(1)[0]
-    # print(most_list)
-    # print(count)
     for table_list in tables_sc:
         if sorted(table_list) == list(most_list):
             return table_list
@@ -123,13 +123,9 @@ if __name__ == "__main__":
     else:
         sc_num = 1
     for i, data in enumerate(tqdm(data_all)):
-        # if i != 550:
-        #     continue
-        # print(i)
         schema = generate_schema(data)
         prompt = instruction + "Schema:\n" + schema + "\n"
         prompt += "Question:\n" + data["question"]
-        # print(prompt)
         tables_all = None
         while tables_all is None:
             try:
@@ -138,14 +134,11 @@ if __name__ == "__main__":
                 print(f'api error, wait for 3 seconds and retry...')
                 time.sleep(3)
                 pass
-        # print(f'tables_all: {tables_all}')
         tables_ori = []
         for table in data['db_schema']:
             tables_ori.append(table['table_name_original'].lower())
         tables = table_sc(tables_all, tables_ori)
-        # print(f'tables: {tables}')
         info = info_generate(tables, data)
         res.append(info)
-        # print(f'res: {res}')
     with open(opt.output_dataset_path, 'w') as f:
         json.dump(res, f, indent=2)

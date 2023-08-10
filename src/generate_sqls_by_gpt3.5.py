@@ -10,44 +10,45 @@ from get_selfconsistent_output import get_sqls
 from tqdm import tqdm
 
 # add your openai api key
-openai.api_key = ""
-
+openai.api_key = "sk-"
 
 chat_prompt = [
-  {
-    "role": "system",
-    "content": "You are now an excellent SQL writer, first I'll give you some tips and examples, and I need you to remember the tips, and do not make same mistakes."
-  },
-  {
-    "role": "user",
-    "content": "Tips 1: \nQuestion: Which origin has most number of flights?\nGold SQL: select origin from flight group by origin order by count ( * ) desc limit 1;\nNotice that the Gold SQL doesn't select COUNT(*) because the question only wants to know the origin and the number should be only used in ORDER BY clause, there are many questions asks in this way, and I need you to remember this in the the following questions."
-  },
-  {
-    "role": "assistant",
-    "content": "Thank you for the tip! I'll keep in mind that when the question only asks for a certain field, I should not include the COUNT(*) in the SELECT statement, but instead use it in the ORDER BY clause to sort the results based on the count of that field."
-  },
-  {
-    "role": "user",
-    "content": "Tips 2: \nDon't use \"IN\", \"OR\", \"LEFT JOIN\" as it might cause extra results, use \"INTERSECT\" or \"EXCEPT\" instead, and remember to use \"DISTINCT\" or \"LIMIT\" when necessary.\nFor example, \nQuestion: Who are the nominees who have been nominated for both a Tony Award and a Drama Desk Award?\nGold SQL should be: select nominee from musical where award = 'Tony Award' intersect select nominee from musical where award = 'Drama Desk Award';"
-  },
-  {
-    "role": "assistant",
-    "content": "Thank you for the tip! I'll remember to use \"INTERSECT\" or \"EXCEPT\" instead of \"IN\", \"OR\", or \"LEFT JOIN\" when I want to find records that match or don't match across two tables. Additionally, I'll make sure to use \"DISTINCT\" or \"LIMIT\" when necessary to avoid repetitive results or limit the number of results returned."
-  }
+    {
+        "role": "system",
+        "content": "You are now an excellent SQL writer, first I'll give you some tips and examples, and I need you to remember the tips, and do not make same mistakes."
+    },
+    {
+        "role": "user",
+        "content": "Tips 1: \nQuestion: Which origin has most number of flights?\nGold SQL: select origin from flight group by origin order by count ( * ) desc limit 1;\nNotice that the Gold SQL doesn't select COUNT(*) because the question only wants to know the origin and the number should be only used in ORDER BY clause, there are many questions asks in this way, and I need you to remember this in the the following questions."
+    },
+    {
+        "role": "assistant",
+        "content": "Thank you for the tip! I'll keep in mind that when the question only asks for a certain field, I should not include the COUNT(*) in the SELECT statement, but instead use it in the ORDER BY clause to sort the results based on the count of that field."
+    },
+    {
+        "role": "user",
+        "content": "Tips 2: \nDon't use \"IN\", \"OR\", \"LEFT JOIN\" as it might cause extra results, use \"INTERSECT\" or \"EXCEPT\" instead, and remember to use \"DISTINCT\" or \"LIMIT\" when necessary.\nFor example, \nQuestion: Who are the nominees who have been nominated for both a Tony Award and a Drama Desk Award?\nGold SQL should be: select nominee from musical where award = 'Tony Award' intersect select nominee from musical where award = 'Drama Desk Award';"
+    },
+    {
+        "role": "assistant",
+        "content": "Thank you for the tip! I'll remember to use \"INTERSECT\" or \"EXCEPT\" instead of \"IN\", \"OR\", or \"LEFT JOIN\" when I want to find records that match or don't match across two tables. Additionally, I'll make sure to use \"DISTINCT\" or \"LIMIT\" when necessary to avoid repetitive results or limit the number of results returned."
+    }
 ]
+
 
 def parse_option():
     parser = argparse.ArgumentParser("command line arguments for generate sqls")
     parser.add_argument("--input_dataset_path", type=str)
     parser.add_argument("--self_consistent", type=bool, default=True)
     parser.add_argument("--n", type=int, default=20,
-                       help="Size of self-consistent set")
+                        help="Size of self-consistent set")
     parser.add_argument("--output_dataset_path", type=str)
     parser.add_argument("--db_dir", type=str, default="./data/database")
 
     opt = parser.parse_args()
 
     return opt
+
 
 def generate_reply(messages, n):
     completions = openai.ChatCompletion.create(
@@ -62,10 +63,12 @@ def generate_reply(messages, n):
         all_p_sqls.append(completions.choices[i].message.content.replace("\n", " "))
     return all_p_sqls
 
+
 def replace_cur_year(query: str) -> str:
     return re.sub(
         "YEAR\s*\(\s*CURDATE\s*\(\s*\)\s*\)\s*", "2020", query, flags=re.IGNORECASE
     )
+
 
 def get_cursor_from_path(sqlite_path: str):
     try:
@@ -78,6 +81,7 @@ def get_cursor_from_path(sqlite_path: str):
     connection.text_factory = lambda b: b.decode(errors="ignore")
     cursor = connection.cursor()
     return cursor
+
 
 def exec_on_db_(sqlite_path: str, query: str):
     query = replace_cur_year(query)
@@ -93,12 +97,14 @@ def exec_on_db_(sqlite_path: str, query: str):
         cursor.connection.close()
         return "exception", e
 
+
 def is_valid(sql, db_path):
     flag, _ = exec_on_db_(db_path, sql)
     if flag == "exception":
         return 0
     else:
         return 1
+
 
 if __name__ == '__main__':
     opt = parse_option()
@@ -110,9 +116,7 @@ if __name__ == '__main__':
     if not opt.self_consistent:
         for i, item in enumerate(data):
             print("id", i)
-            # TODO 改一下DB路径
             db_dir = opt.db_dir + '/' + item['db_id'] + '/' + item['db_id'] + '.sqlite'
-            # print(f"db_dir: {db_dir}")
             for j in range(5):
                 messages = []
                 messages = chat_prompt.copy()
@@ -135,7 +139,6 @@ if __name__ == '__main__':
             print(p_sql_final)
     else:
         for i, item in enumerate(tqdm(data)):
-            # print("id", i)
             db_dir = opt.db_dir + '/' + item['db_id'] + '/' + item['db_id'] + '.sqlite'
             p_sqls = []
             for j in range(5):
@@ -163,10 +166,11 @@ if __name__ == '__main__':
                         print(f"fix_select_column err, p_sql: {p_sql}")
                         pass
                     p_sql = p_sql.replace("> =", ">=").replace("< =", "<=").replace("! =", "!=")
+                    p_sql = p_sql.replace("\n", " ")
+                    while "  " in p_sql:
+                        p_sql = p_sql.replace("  ", " ")
                     temp.append(p_sql)
-                    # print(f'p_sql: {p_sql}')
                 p_sqls = temp
-                # print(f"p_sqls: {p_sqls}")
                 if is_valid(p_sqls[0], db_dir):
                     break
                 else:
@@ -182,7 +186,6 @@ if __name__ == '__main__':
                 result['p_sqls'].append(sql)
             results.append(result)
             # time.sleep(1)
-            # print(f'results: {results}')
         p_sql_final = get_sqls(results, opt.n, opt.db_dir)
     with open(opt.output_dataset_path, 'w') as f:
         for sql in p_sql_final:
