@@ -18,21 +18,21 @@ python src/preprocessing.py \
     --mode "test" \
     --table_path $tables \
     --input_dataset_path $dataset_path \
-    --output_dataset_path "./generate_datasets/preprocessed_test.json" \
+    --output_dataset_path "./generate_datasets/preprocessed_data.json" \
     --db_path "$db_path" \
     --target_type "sql"
 
 # recall tables
 echo "recall tables..."
 python src/table_recall.py \
-    --input_dataset_path "./generate_datasets/preprocessed_test.json" \
-    --output_dataset_path "./generate_datasets/table_recall.json" \
+    --input_dataset_path "./generate_datasets/preprocessed_data.json" \
+    --recalled_tables_path "./generate_datasets/table_recall.json" \
 
 # recall columns
 echo "recall columns..."
 python src/column_recall.py \
-    --input_dataset_path "./generate_datasets/table_recall.json" \
-    --output_dataset_path "./generate_datasets/column_recall.json" \
+    --recalled_tables_path "./generate_datasets/table_recall.json" \
+    --recalled_columns_path "./generate_datasets/column_recall.json" \
 
 # generate prompt
 echo "generate prompt..."
