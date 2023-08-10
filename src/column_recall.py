@@ -11,12 +11,12 @@ openai.api_key = "sk-"
 
 def parse_option():
     parser = argparse.ArgumentParser("command line arguments for recall columns")
-    parser.add_argument("--input_dataset_path", type=str)
+    parser.add_argument("--input_recalled_tables_path", type=str)
     parser.add_argument("--self_consistent", type=bool, default=True)
     parser.add_argument("--n", type=int, default=10,
                         help="Size of self-consistent set")
     parser.add_argument("--add_fk", type=bool, default=True)
-    parser.add_argument("--output_dataset_path", type=str)
+    parser.add_argument("--output_recalled_columns_path", type=str)
 
     opt = parser.parse_args()
 
@@ -27,10 +27,8 @@ def generate_reply(input, sc_num):
     completions = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=input,
-        # top_p=0.5
         temperature=0.7,
         n=sc_num
-        # stop=["Q:"]
     )
     tabs_cols_all = []
     for i in range(sc_num):
@@ -100,9 +98,7 @@ def column_sc(tabs_cols_all, tabs_cols_ori, fk_ori):
         for key, value in tabs_cols.items():
             if key in tabs_cols_ori:
                 candidates[key].append(value)
-    # print(len(candidates))
 
-    # select top-4 valid columns for each sc candidate
     for tab, cols_all in candidates.items():
         cols_ori = [item.lower() for item in tabs_cols_ori[tab]]
         cols_sc = []
