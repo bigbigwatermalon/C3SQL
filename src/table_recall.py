@@ -15,7 +15,7 @@ def parse_option():
     parser.add_argument("--self_consistent", type=bool, default=True)
     parser.add_argument("--n", type=int, default=10,
                         help="Size of self-consistent set")
-    parser.add_argument("--output_dataset_path", type=str)
+    parser.add_argument("--output_recalled_tables_path", type=str)
 
     opt = parser.parse_args()
 
@@ -40,8 +40,7 @@ def generate_reply(input, sc_num):
             raw_table = eval(raw_table)
             if Ellipsis in raw_table:
                 raw_table.remove(Ellipsis)
-        except Exception as e:
-            print(e)
+        except:
             print('list error')
             return None
         all_tables.append(raw_table)

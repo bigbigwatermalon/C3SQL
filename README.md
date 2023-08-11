@@ -15,7 +15,7 @@ mv spider data
 ### Run Inference 
 Run the command below, and the predicted sql will be save to the file named "predicted_sql.txt"
 ```shell
-bash submit.sh 
+bash run_c3sql.sh 
 ```
 
 ## Run evaluation 
