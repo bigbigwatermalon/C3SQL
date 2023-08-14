@@ -19,6 +19,11 @@ bash run_c3sql.sh
 ```
 
 ## Run evaluation 
+Add your openai key in the *generate_sqls_by_gpt3.5.py*, *column_recall.py*, *table_recall.py* files. 
+```shell
+openai.api_key = "your_api_key"
+```
+
 Clone evaluation scripts (test-suite-sql-eval:[https://github.com/taoyds/test-suite-sql-eval](https://github.com/taoyds/test-suite-sql-eval)): 
 
 ```shell
