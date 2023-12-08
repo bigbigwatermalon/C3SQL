@@ -139,5 +139,5 @@ if __name__ == "__main__":
         tables = table_sc(tables_all, tables_ori)
         info = info_generate(tables, data)
         res.append(info)
-    with open(opt.output_dataset_path, 'w') as f:
+    with open(opt.output_recalled_tables_path, 'w') as f:
         json.dump(res, f, indent=2)
